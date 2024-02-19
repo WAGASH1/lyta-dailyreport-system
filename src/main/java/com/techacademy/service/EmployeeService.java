@@ -27,6 +27,33 @@ public class EmployeeService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional // 従業員更新
+    public ErrorKinds update(Employee employee) {
+
+        if ("".equals(employee.getPassword())) {
+            // パスワードが空白だった場合
+            Employee existingEmployee = findByCode(employee.getCode());
+            employee.setPassword(existingEmployee.getPassword());
+
+            //パスワードチェック
+        } else {
+            ErrorKinds result = employeePasswordCheck(employee);
+            if (ErrorKinds.CHECK_OK != result) {
+                return result;
+            }
+
+        }
+        LocalDateTime now = LocalDateTime.now();
+        employee.setUpdatedAt(now);
+
+        Employee newCreat = findByCode(employee.getCode());
+        employee.setCreatedAt(newCreat.getCreatedAt());
+
+        employeeRepository.save(employee);
+        return ErrorKinds.SUCCESS;
+
+    }
+
     // 従業員保存
     @Transactional
     public ErrorKinds save(Employee employee) {
@@ -46,31 +73,6 @@ public class EmployeeService {
 
         LocalDateTime now = LocalDateTime.now();
         employee.setCreatedAt(now);
-        employee.setUpdatedAt(now);
-
-        employeeRepository.save(employee);
-        return ErrorKinds.SUCCESS;
-    }
-
-    // 従業員更新
-    @Transactional
-    public ErrorKinds update(Employee employee) {
-
-        // パスワードチェック
-        ErrorKinds result = employeePasswordCheck(employee);
-        if (ErrorKinds.CHECK_OK != result) {
-            return result;
-        }
-
-        // 従業員番号が存在しないか、自身のレコード以外に重複していないかチェック
-        Employee existEmployee = findByCode(employee.getCode());
-        if (existEmployee != null && !existEmployee.getCode().equals(employee.getCode())) {
-            return ErrorKinds.DUPLICATE_ERROR;
-        }
-
-        employee.setDeleteFlg(false);
-
-        LocalDateTime now = LocalDateTime.now();
         employee.setUpdatedAt(now);
 
         employeeRepository.save(employee);

@@ -19,7 +19,8 @@
                 <div class="col-xl-12">
                     <div class="card">
                         <div class="card-body">
-                            <form th:action="@{/employees/update/}" th:object="${employee}" th:method="post">
+                            <form th:action="@{/employees/{code}/update(code=${employee.code})}" th:object="${employee}"
+                                th:method="post">
                                 <div class="wizard wizard-success mb-4">
                                     <div class="mb-3 bg-light p-3">
                                         <label class="form-label">パスワードは変更する場合のみ入力してください</label>
@@ -28,7 +29,8 @@
                                         <label class="form-label" for="code">社員番号</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
-                                            <label class="form-text" th:text="${employee.code}"></label>
+                                            <input type="hidden" code="code" name="code" th:value="*{code}"
+                                                th:text="*{code}">
                                         </div>
                                     </div>
 
@@ -38,7 +40,7 @@
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
                                             <input class="form-control" type="text" th:field="*{name}"
-                                                th:value="${employee.name}" th:errorclass="err" id="name">
+                                                th:errorclass="err" id="name">
                                             <span th:errors="*{name}" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -47,7 +49,9 @@
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
                                             <input class="form-control" type="password" th:field="*{password}"
-                                                 id="password">
+                                                id="password">
+                                            <span th:if="${passwordError} neq null" th:text="${passwordError}"
+                                                class="text-danger"></span>
 
                                         </div>
                                     </div>
