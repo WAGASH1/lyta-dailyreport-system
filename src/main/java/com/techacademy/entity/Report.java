@@ -1,10 +1,12 @@
 
 package com.techacademy.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -14,13 +16,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
-import java.util.Date;
-import java.util.List;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
+import java.util.Date;
+
+@Data
 @Entity
 @Table(name = "reports")
 @SQLRestriction("delete_flg = false")
@@ -31,12 +34,13 @@ public class Report {
     // ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotEmpty
     private int id;
 
     // 日付
-    @NotEmpty
-    private Date reportDate;
+    @NotNull
+    @Column(nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate reportDate;
 
 
     // タイトル
@@ -47,7 +51,9 @@ public class Report {
 
 
     // 内容
+    @Column(columnDefinition="LONGTEXT")
     @NotEmpty
+    @Length(max = 600)
     private String content;
 
 

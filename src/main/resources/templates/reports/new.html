@@ -27,6 +27,7 @@
                                         <div class="col-md-7">
                                             <input type="date" class="form-control" id="reportDate"  　min="2024-01-01"
                                                 max="2034-12-31" />
+                                            <span th:if="${reportDateError} neq null" th:text="${reportDateError}" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -40,15 +41,17 @@
                                         <label class="form-label" for="title">タイトル</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
-
-                                            <input class="form-control" type="text" </div>
+                                            <input class="form-control" type="text" th:field="*{title}" th:errorclass="err" id="title">
+                                            <span th:errors="*{title}" class="text-danger"></span>
+                                            </div>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label" for="title">内容</label>
+                                            <label class="form-label" for="content">内容</label>
                                             <p class="mb-1"></p>
                                             <div class="col-md-12">
-                                                <textarea class="form-control" id="content" rows="15"
-                                                    cols="18"></textarea>
+                                                <textarea class="form-control" type="text" th:field="*{content}" th:errorclass="err" id="content" rows="14"
+                                                    cols="17"></textarea>
+                                                    <span th:errors="*{content}" class="text-danger"></span>
                                             </div>
                                         </div>
                                     </div>
