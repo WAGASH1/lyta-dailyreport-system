@@ -44,16 +44,16 @@ public class ReportService {
     public List<Report> findAll() {
         return reportRepository.findAll();
     }
-//
-//    // 1件を検索
-//    public Employee findByCode(String code) {
+
+    // 1件を検索
+//    public Report findById(int id) {
 //        // findByIdで検索
-//        Optional<Employee> option = employeeRepository.findById(code);
+//        Optional<>Report option = reportRepository.findById(id);
 //        // 取得できなかった場合はnullを返す
-//        Employee employee = option.orElse(null);
+//        Report employee = option.orElse(null);
 //        return employee;
 //    }
-//
+
 
 
 }

@@ -57,7 +57,7 @@ public class Report {
     private String content;
 
 
-    // 社員番号
+    //社員番号
     @ManyToOne
     @JoinColumn(name="employee_code", referencedColumnName="code" , nullable = false)
     private Employee employee;
