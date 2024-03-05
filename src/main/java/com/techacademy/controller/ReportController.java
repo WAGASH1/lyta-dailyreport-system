@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.techacademy.constants.ErrorKinds;
 import com.techacademy.constants.ErrorMessage;
-
+import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
 import com.techacademy.service.ReportService;
 import com.techacademy.service.UserDetail;
@@ -42,13 +42,13 @@ public class ReportController {
         return "reports/list";
     }
 
-//    // 日報詳細画面
-//    @GetMapping(value = "/{id}/")
-//    public String detail(@PathVariable int id, Model model) {
-//
-//        model.addAttribute("report", reportService.findById(id));
-//        return "reports/detail";
-//    }
+    // 日報詳細画面
+    @GetMapping(value = "/{id}/")
+    public String detail(@PathVariable String id, Model model) {
+
+        model.addAttribute("report", reportService.findByDate(id));
+        return "reports/detail";
+    }
 
     // 日報新規登録画面
     @GetMapping(value = "/add")
@@ -60,15 +60,24 @@ public class ReportController {
 
     // 従業員新規登録処理
     @PostMapping(value = "/add")
-    public String add(@Validated Report report, BindingResult res, Model model) {
-
+    public String add(@Validated Report report, BindingResult res, @AuthenticationPrincipal UserDetail userDetail, Model model) {
         // 入力チェック
         if (res.hasErrors()) {
             return "reports/new";
         }
 
         try {
-            ErrorKinds result = reportService.save(report);
+            // ログインしている従業員情報を取得
+            Employee employee = userDetail.getEmployee();
+
+//            if (reportService.save(report.getReportDate(), employee)) {
+//                // エラーメッセージ
+//                model.addAttribute("reportDateError", "既に登録されている日付です");
+//                return "reports/new";
+//            }
+
+            // 従業員情報を使用して日報を保存
+            ErrorKinds result = reportService.save(report, employee);
 
             if (ErrorMessage.contains(result)) {
                 model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
@@ -83,7 +92,6 @@ public class ReportController {
 
         return "redirect:/reports";
     }
-
 }
 
 
