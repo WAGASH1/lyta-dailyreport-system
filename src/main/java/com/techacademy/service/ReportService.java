@@ -1,12 +1,10 @@
 package com.techacademy.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.techacademy.constants.ErrorKinds;
 import com.techacademy.entity.Employee;
@@ -18,44 +16,76 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReportService {
 
     private final ReportRepository reportRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public ReportService(ReportRepository reportRepository, PasswordEncoder passwordEncoder) {
+    public ReportService(ReportRepository reportRepository) {
         this.reportRepository = reportRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     // 日報保存
     @Transactional
     public ErrorKinds save(Report report, Employee employee) {
 
-        // 日報日付重複チェック
-//        if (findByDate(report.getReportDate()) != null) {
+//        Report existingReport = reportRepository.findByReportDate(report.getReportDate());
+//
+//        // 既存の日報が見つかった場合はエラーを返す
+//        if (existingReport != null) {
 //            return ErrorKinds.DATECHECK_ERROR;
+//        }
 
-            report.setEmployee(employee);
-            report.setDeleteFlg(false);
+        report.setEmployee(employee);
+        report.setDeleteFlg(false);
 
-            LocalDateTime now = LocalDateTime.now();
-            report.setCreatedAt(now);
-            report.setUpdatedAt(now);
+        LocalDateTime now = LocalDateTime.now();
+        report.setCreatedAt(now);
+        report.setUpdatedAt(now);
 
-            reportRepository.save(report);
-            return ErrorKinds.SUCCESS;
-        }
+        reportRepository.save(report);
+        return ErrorKinds.SUCCESS;
+    }
 
+    // 日報削除
+    @Transactional
+    public ErrorKinds delete(int id, UserDetail userDetail) {
+        Report report = findById(id);
+
+        LocalDateTime now = LocalDateTime.now();
+        report.setUpdatedAt(now);
+        report.setDeleteFlg(true);
+
+        return ErrorKinds.SUCCESS;
+    }
+
+    @Transactional // 日報更新
+    public ErrorKinds update(Report report, Employee employee) {
+
+        report.setEmployee(employee);
+        report.setDeleteFlg(false);
+        LocalDateTime now = LocalDateTime.now();
+        report.setUpdatedAt(now);
+
+        Report newCreat = findById(report.getId());
+        report.setCreatedAt(newCreat.getCreatedAt());
+
+        reportRepository.save(report);
+        return ErrorKinds.SUCCESS;
+    }
 
     // 従業員一覧表示処理
     public List<Report> findAll() {
         return reportRepository.findAll();
     }
 
+    // 日付を使用して日報を検索
+    @Transactional(readOnly = true)
+    public Report findByReportDate(LocalDate reportDate) {
+        return reportRepository.findByReportDate(reportDate);
+    }
+
     // 1件を検索
-    public Report findByDate(String date) {
-        // findByIdで検索
-        Optional<Report> option = reportRepository.findById(date);
-        // 取得できなかった場合はnullを返す
+    public Report findById(int id) {
+        String stringId = String.valueOf(id);
+        Optional<Report> option = reportRepository.findById(stringId);
         Report report = option.orElse(null);
         return report;
     }
