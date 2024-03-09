@@ -37,7 +37,7 @@ public class ReportService {
 
     // 日報保存
     @Transactional
-    public ErrorKinds save(Report report,  Employee employee) {
+    public ErrorKinds save(Report report, Employee employee) {
 
         if (reportExists(report, employee)) {
             return ErrorKinds.DATECHECK_ERROR;
@@ -68,10 +68,17 @@ public class ReportService {
     // 日報更新
     @Transactional
     public ErrorKinds update(Report report, Employee employee) {
-        if (reportExists(report, employee)) {
-            return ErrorKinds.DATECHECK_ERROR;
-        }
 
+        Report existingReport = findById(report.getId());
+
+        if (!existingReport.getReportDate().equals(report.getReportDate())) {
+            // 同じ日付の他の日報が存在するか確認
+            List<Report> otherReports = reportRepository.findByEmployeeAndReportDateAndIdNot(employee,
+                    report.getReportDate(), report.getId());
+            if (!otherReports.isEmpty()) {
+                return ErrorKinds.DATECHECK_ERROR;
+            }
+        }
         report.setEmployee(employee);
         report.setDeleteFlg(false);
         LocalDateTime now = LocalDateTime.now();
