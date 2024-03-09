@@ -3,6 +3,7 @@ package com.techacademy.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -33,10 +34,15 @@ public class ReportController {
 
     // 日報一覧画面
     @GetMapping
-    public String list(Model model) {
-
-        model.addAttribute("listSize", reportService.findAll().size());
-        model.addAttribute("reportList", reportService.findAll());
+    public String list(Model model, @AuthenticationPrincipal UserDetail userDetail) {
+        // ユーザーが管理者であるかどうかを確認
+        if (userDetail.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))) {
+            model.addAttribute("listSize", reportService.findAll().size());
+            model.addAttribute("reportList", reportService.findAll());
+        } else {
+            model.addAttribute("listSize", reportService.findAllReports(userDetail).size());
+            model.addAttribute("reportList", reportService.findAllReports(userDetail));
+        }
 
         return "reports/list";
     }
@@ -51,19 +57,20 @@ public class ReportController {
 
     // 日報更新画面表示
     @GetMapping(value = "/{id}/update")
-    public String edit(@PathVariable("id") int id,@AuthenticationPrincipal UserDetail userDetail, Model model) {
+    public String edit(@PathVariable("id") int id, @AuthenticationPrincipal UserDetail userDetail, Model model) {
         model.addAttribute("report", reportService.findById(id));
         model.addAttribute("employeeName", userDetail.getEmployee().getName());
 
         return "reports/update";
     }
 
-    //日報更新処理
+    // 日報更新処理
     @PostMapping(value = "/{id}/update")
-    public String postUser(@Validated Report report, BindingResult res, @AuthenticationPrincipal UserDetail userDetail, Model model) {
+    public String postUser(@Validated Report report, BindingResult res, @AuthenticationPrincipal UserDetail userDetail,
+            Model model) {
         model.addAttribute("employeeName", userDetail.getEmployee().getName());
 
-     // 入力チェック
+        // 入力チェック
         if (res.hasErrors()) {
             model.addAttribute("employeeName", userDetail.getEmployee().getName());
             return "reports/update";
@@ -97,9 +104,10 @@ public class ReportController {
         return "reports/new";
     }
 
-    // 従業員新規登録処理
+ // 従業員新規登録処理
     @PostMapping(value = "/add")
-    public String add(@Validated Report report, BindingResult res, @AuthenticationPrincipal UserDetail userDetail, Model model) {
+    public String add(@Validated Report report, BindingResult res, @AuthenticationPrincipal UserDetail userDetail,
+            Model model) {
         // 入力チェック
         if (res.hasErrors()) {
             model.addAttribute("employeeName", userDetail.getEmployee().getName());
@@ -107,10 +115,8 @@ public class ReportController {
         }
 
         try {
-            // ログインしている従業員情報を取得
-            Employee employee = userDetail.getEmployee();
-
             // 従業員情報を使用して日報を保存
+            Employee employee = userDetail.getEmployee(); // ログインしている従業員を取得
             ErrorKinds result = reportService.save(report, employee);
 
             if (ErrorMessage.contains(result)) {

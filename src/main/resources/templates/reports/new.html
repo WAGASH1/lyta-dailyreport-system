@@ -25,9 +25,10 @@
                                         <label class="form-label" for="reportDate">日付</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
-                                            <input type="date" class="form-control" id="reportDate"　th:field="*{reportDate}" min="2024-01-01"
+                                            <input type="date" class="form-control" id="reportDate" th:errorclass="err" th:field="*{reportDate}" min="2024-01-01"
                                                 max="2034-12-31"/>
                                             <span th:errors="*{reportDate}" class="text-danger"></span>
+                                            <span th:if="${reportDateError} neq null" th:text="${reportDateError}" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="mb-3">
