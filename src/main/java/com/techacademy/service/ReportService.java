@@ -68,6 +68,9 @@ public class ReportService {
     // 日報更新
     @Transactional
     public ErrorKinds update(Report report, Employee employee) {
+        if (reportExists(report, employee)) {
+            return ErrorKinds.DATECHECK_ERROR;
+        }
 
         report.setEmployee(employee);
         report.setDeleteFlg(false);
